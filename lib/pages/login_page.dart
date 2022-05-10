@@ -1,33 +1,40 @@
-import 'package:flutter/material.dart';
-
+import 'package:chat/helpers/mostrar_alerta.dart';
+import 'package:chat/services/socket_service.dart';
 import 'package:chat/widgets/boton_azul.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:chat/services/auth_service.dart';
+
 import 'package:chat/widgets/labels.dart';
 import 'package:chat/widgets/logo.dart';
 import 'package:chat/widgets/custom_input.dart';
 
 
-// ignore: use_key_in_widget_constructors
 class LoginPage extends StatelessWidget {
+  const LoginPage({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF2F2F2),
+      backgroundColor: Color(0xffF2F2F2),
       body:SafeArea(
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          // ignore: sized_box_for_whitespace
+          physics: BouncingScrollPhysics(),
           child: Container(
-            height: MediaQuery.of(context).size.height *0.9,
+            height: MediaQuery.of(context).size.height * 0.9,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [ 
-                Logo(titulo: 'Messenger'),
-        
-                _Form(),
-        
-                Lebels(ruta: 'register', titulo: 'No tienes cuenta?', subtitulo: 'Crear una ahora!'),
-        
+
+                Logo( titulo: 'Messenger' ),        
+                _Form(),        
+                Lebels(
+                  ruta: 'register',
+                  titulo: 'No tienes cuenta?',
+                  subtitulo: 'Crear una ahora!',
+                ),
                 Text('Términos y condiciones de uso', style: TextStyle(fontWeight: FontWeight.w200)
                 ),
               ],
@@ -50,7 +57,10 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
-    // ignore: avoid_unnecessary_containers
+
+    final authService = Provider.of<AuthService>( context );
+    final socketService = Provider.of<SocketService>( context );
+
     return Container(      
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -60,6 +70,7 @@ class __FormState extends State<_Form> {
             CustomInput(
               icon: Icons.mail_outline,
               placeholder: 'Correo',
+              keyboardtype: TextInputType.emailAddress, 
               textController: emailCtrl,
             ),
 
@@ -72,14 +83,29 @@ class __FormState extends State<_Form> {
            
            BotonAzul(
              text: 'Ingrese',
-             onPressed: () {
-               print( emailCtrl.text);
-               print( passCtrl.text);
-             },
+             onPressed: authService.autenticando 
+              ? () => {} 
+              : () async {  
+                print('object');
+              FocusScope.of(context).unfocus();
+
+              final loginOk = await authService.login(emailCtrl.text.trim(), passCtrl.text.trim());
+              
+              if ( loginOk ) {
+                socketService.connect();
+                Navigator.pushReplacementNamed(context, 'usuarios');
+              } else {
+                mostrarAlerta(context, 'Login incorrecto','Revise sus credenciales puto');
+              }
+             }
            )
         ],
       ),
     );
   }
 }
+
+ class FacusScope {
+   static of(BuildContext context) {}
+ }
 

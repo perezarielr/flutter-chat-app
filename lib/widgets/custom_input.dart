@@ -27,6 +27,8 @@ class CustomInput extends StatelessWidget {
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
+              offset: Offset(0, 5),
+              blurRadius: 5
             ),
           ]),
       child: TextField(
@@ -38,7 +40,8 @@ class CustomInput extends StatelessWidget {
             prefixIcon: Icon( this.icon ),
             focusedBorder: InputBorder.none,
             border: InputBorder.none,
-            hintText: this.placeholder),
+            hintText: this.placeholder
+           ),
       ),
     );
   }
